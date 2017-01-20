@@ -8,6 +8,7 @@ import message_filters
 import numpy
 import rospy
 import collections
+from light import Light
 from cv_bridge import CvBridge
 from keras.models import load_model
 from keras.preprocessing.image import img_to_array
@@ -19,14 +20,11 @@ IMAGE_DIMENSIONS = (96, 64)
 
 
 class TrafficClassifier:
-  RED = 0
-  GREEN = 1
-  UNKNOWN = 2
   RADIUS_MULTIPLIER = 6
 
   model = None
   model_path = None
-  last_published_prediction = UNKNOWN
+  last_published_prediction = Light.UNKNOWN
 
   # Remove signal outliers
   detection_queue = collections.deque(maxlen=10)
@@ -76,11 +74,11 @@ class TrafficClassifier:
     image_array = img_to_array(cropped_roi.resize(IMAGE_DIMENSIONS, PIL.Image.ANTIALIAS))
     prediction = loaded_model.predict(image_array[None, :])
     if prediction[0][0] == 1:
-      return self.GREEN
+      return Light.GREEN
     elif prediction[0][1] == 1:
-      return self.RED
+      return Light.RED
     else:
-      return self.UNKNOWN
+      return Light.UNKNOWN
 
   def most_common_prediction(self, prediction):
     self.detection_queue.append(prediction)
@@ -99,7 +97,7 @@ class TrafficClassifier:
   def detect_signal(self, signal, image):
     if len(signal.Signals) == 0:
       # No signals are visible
-      self.publish_prediction(self.UNKNOWN)
+      self.publish_prediction(Light.UNKNOWN)
       return
 
     # Convert the image to PIL
