@@ -21,6 +21,7 @@ IMAGE_DIMENSIONS = (96, 64)
 
 class TrafficClassifier:
   RADIUS_MULTIPLIER = 6
+  MAX_RADIUS = 10
 
   model = None
   model_path = None
@@ -60,6 +61,9 @@ class TrafficClassifier:
       xmax = max(xmax, x)
       ymin = min(ymin, y)
       ymax = max(ymax, y)
+
+    # Filter out huge radius values
+    radius_max = min(radius_max, self.MAX_RADIUS)
 
     return int(xmin - self.RADIUS_MULTIPLIER * radius_max), int(xmax + self.RADIUS_MULTIPLIER * radius_max), int(
       ymin - self.RADIUS_MULTIPLIER * radius_max), int(ymax + self.RADIUS_MULTIPLIER * radius_max)
